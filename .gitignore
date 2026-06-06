@@ -1,0 +1,13 @@
+node_modules/
+.env
+backend/uploads/*
+!backend/uploads/.gitkeep
+dist/
+.superpowers/
+.DS_Store
+*.tsbuildinfo
+
+# Compiled JS artifacts (TypeScript source is canonical)
+backend/src/**/*.js
+frontend/src/**/*.js
+shared/*.js

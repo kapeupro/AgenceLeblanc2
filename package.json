@@ -1,0 +1,13 @@
+{
+  "name": "agence-leblanc",
+  "private": true,
+  "workspaces": ["shared", "backend", "frontend"],
+  "scripts": {
+    "dev": "bun run --cwd backend dev & bun run --cwd frontend dev",
+    "dev:backend": "bun run --cwd backend dev",
+    "dev:frontend": "bun run --cwd frontend dev",
+    "db:generate": "bun run --cwd backend db:generate",
+    "db:migrate": "bun run --cwd backend db:migrate",
+    "db:seed": "bun run --cwd backend db:seed"
+  }
+}

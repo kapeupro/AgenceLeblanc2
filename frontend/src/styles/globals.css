@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #122866;
+  --color-navy-deep: #0e1f52;
+  --color-sky: #dcebfd;
+  --color-sky-soft: #eaf2fe;
+  --color-blush: #fef4f3;
+  --color-coral: #c75d48;
+  --color-coral-soft: #e98a72;
+  --color-gray-bg: #f7f7f8;
+  --color-line: #e9eaee;
+  --color-ink: #1f2433;
+  --color-head: #22305e;
+  --color-muted: #6c7184;
+  --color-muted-2: #9aa0b0;
+
+  --font-sans: 'Poppins', system-ui, sans-serif;
+  --font-display: 'Anton', sans-serif;
+  --font-script: 'Yellowtail', cursive;
+
+  --radius-sm: 12px;
+  --radius: 18px;
+  --radius-lg: 28px;
+
+  --shadow-card: 0 24px 60px -28px rgba(18,40,102,.28);
+  --shadow-soft: 0 18px 40px -24px rgba(18,40,102,.20);
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: #fff;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+  }
+
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  h1,h2,h3,h4 { margin: 0; color: var(--color-head); font-weight: 700; line-height: 1.15; }
+}
+
+.ph {
+  position: relative;
+  overflow: hidden;
+  background: repeating-linear-gradient(135deg, #e7ecf6 0 14px, #dde4f1 14px 28px);
+  display: flex; align-items: center; justify-content: center;
+  color: #7c89a8;
+}
+.ph.navy {
+  background: repeating-linear-gradient(135deg, #1b3072 0 14px, #16285f 14px 28px);
+  color: #9fb3e6;
+}
+.ph-label {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  letter-spacing: .04em;
+  text-align: center;
+  padding: 8px 14px;
+  border: 1px dashed currentColor;
+  border-radius: 6px;
+  background: rgba(255,255,255,.32);
+  max-width: 80%;
+}
+
+@keyframes fadeUp { from { transform: translateY(14px); } to { transform: none; } }
+.fade-up { animation: fadeUp .5s ease both; }
