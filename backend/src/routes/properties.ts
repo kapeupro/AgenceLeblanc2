@@ -1,25 +1,19 @@
 import { Elysia, t } from 'elysia';
 import { db } from '../db/client';
 import { properties, propertyPhotos, teamMembers } from '../db/schema';
-import { eq, and, lte, ilike, or, desc, asc } from 'drizzle-orm';
+import { eq, and, lte, ilike, or, desc, asc, inArray } from 'drizzle-orm';
 import { authPlugin } from '../plugins/auth-plugin';
 
 async function withPhotosAndAgent(rows: (typeof properties.$inferSelect)[]) {
   if (!rows.length) return [];
   const ids = rows.map(r => r.id);
   const photos = await db.select().from(propertyPhotos)
-    .where(ids.length === 1
-      ? eq(propertyPhotos.propertyId, ids[0])
-      : undefined
-    ).orderBy(asc(propertyPhotos.position));
+    .where(inArray(propertyPhotos.propertyId, ids))
+    .orderBy(asc(propertyPhotos.position));
 
   const agentIds = [...new Set(rows.map(r => r.agentId).filter(Boolean))] as string[];
   const agents = agentIds.length
-    ? await db.select().from(teamMembers).where(
-        agentIds.length === 1
-          ? eq(teamMembers.id, agentIds[0])
-          : undefined
-      )
+    ? await db.select().from(teamMembers).where(inArray(teamMembers.id, agentIds))
     : [];
 
   return rows.map(r => ({

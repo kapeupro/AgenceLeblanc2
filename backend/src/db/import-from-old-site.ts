@@ -84,7 +84,9 @@ function slugify(text: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function parseType(slug: string): schema.PropertyTypeEnum {
+type PropertyType = (typeof schema.propertyTypeEnum.enumValues)[number];
+
+function parseType(slug: string): PropertyType {
   if (slug.includes('appartement')) return 'appartement';
   if (slug.includes('terrain')) return 'terrain';
   if (slug.includes('local')) return 'local';

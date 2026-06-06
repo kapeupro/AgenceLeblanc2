@@ -29,4 +29,20 @@ export const contactRoutes = new Elysia({ prefix: '/api/contact' })
       .where(eq(contactSubmissions.id, params.id))
       .returning();
     return row;
+  })
+  .put('/:id/unread', async ({ params, requireAdmin }) => {
+    await requireAdmin();
+    const [row] = await db.update(contactSubmissions)
+      .set({ read: false })
+      .where(eq(contactSubmissions.id, params.id))
+      .returning();
+    return row;
+  })
+  .delete('/:id', async ({ params, requireAdmin, set }) => {
+    await requireAdmin();
+    const [deleted] = await db.delete(contactSubmissions)
+      .where(eq(contactSubmissions.id, params.id))
+      .returning();
+    if (!deleted) { set.status = 404; return { error: 'Message non trouvé' }; }
+    return { ok: true };
   });
