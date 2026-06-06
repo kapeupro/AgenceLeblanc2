@@ -1,0 +1,15 @@
+node_modules
+**/node_modules
+.git
+.gitignore
+frontend/dist
+**/*.tsbuildinfo
+.DS_Store
+.superpowers
+.remember
+docs/superpowers
+*.log
+# Les uploads (photos des biens) sont volumineux : on ne les met PAS dans
+# l'image. Voir DEPLOYMENT.md — à servir via un volume persistant ou à
+# régénérer avec `bun db:import` après le déploiement.
+backend/uploads
