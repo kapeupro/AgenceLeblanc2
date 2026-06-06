@@ -8,6 +8,8 @@
     "dev:frontend": "bun run --cwd frontend dev",
     "db:generate": "bun run --cwd backend db:generate",
     "db:migrate": "bun run --cwd backend db:migrate",
-    "db:seed": "bun run --cwd backend db:seed"
+    "db:seed": "bun run --cwd backend db:seed",
+    "db:import": "bun run --cwd backend db:import",
+    "db:export": "bun run --cwd backend db:export"
   }
 }

@@ -86,9 +86,16 @@ bun db:migrate
 # Insérer les données de test
 bun db:seed
 
-# (Optionnel) Importer les annonces depuis l'ancien site
-bun run --cwd backend src/db/import-from-old-site.ts
+# (Optionnel) Importer les 63 annonces depuis l'ancien site
+bun db:import
+
+# Exporter les annonces vers data/annonces.json + data/annonces.csv
+bun db:export
 ```
+
+> Les prix sont stockés en **centimes** (convention de l'app : `× 100` à la
+> saisie, `/ 100` à l'affichage). L'export inclut `priceEuros` **et**
+> `priceCents` pour lever toute ambiguïté côté consommateur.
 
 ---
 
