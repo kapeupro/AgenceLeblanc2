@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 
@@ -15,8 +16,11 @@ type Contact = {
   createdAt: string;
 };
 
+type Filter = 'all' | 'unread' | 'achat' | 'vente';
+
 function AdminContactsPage() {
   const qc = useQueryClient();
+  const [filter, setFilter] = useState<Filter>('all');
 
   const { data: contacts = [], isLoading } = useQuery({
     queryKey: ['admin-contacts'],
@@ -26,31 +30,63 @@ function AdminContactsPage() {
     },
   });
 
-  const markRead = useMutation({
-    mutationFn: async (id: string) => {
-      await api.api.contact({ id }).read.put();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ['admin-contacts'] });
+
+  const setRead = useMutation({
+    mutationFn: async ({ id, read }: { id: string; read: boolean }) => {
+      if (read) await api.api.contact({ id }).read.put();
+      else await api.api.contact({ id }).unread.put();
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-contacts'] }),
-    onError: () => alert('Erreur lors du marquage. Veuillez réessayer.'),
+    onSuccess: invalidate,
+    onError: () => alert('Erreur lors de la mise à jour. Veuillez réessayer.'),
   });
 
-  const sorted = [...contacts].sort((a, b) => {
-    if (a.read === b.read) return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    return a.read ? 1 : -1;
+  const remove = useMutation({
+    mutationFn: async (id: string) => { await api.api.contact({ id }).delete(); },
+    onSuccess: invalidate,
+    onError: () => alert('Erreur lors de la suppression. Veuillez réessayer.'),
   });
 
   const unreadCount = contacts.filter(c => !c.read).length;
 
+  const visible = contacts.filter(c => {
+    if (filter === 'unread') return !c.read;
+    if (filter === 'achat') return c.intent === 'achat';
+    if (filter === 'vente') return c.intent === 'vente';
+    return true;
+  });
+  const sorted = [...visible].sort((a, b) => {
+    if (a.read === b.read) return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return a.read ? 1 : -1;
+  });
+
+  const tabs: { key: Filter; label: string; count?: number }[] = [
+    { key: 'all', label: 'Tous', count: contacts.length },
+    { key: 'unread', label: 'Non lus', count: unreadCount },
+    { key: 'achat', label: 'Achat' },
+    { key: 'vente', label: 'Vente' },
+  ];
+
   return (
     <div>
-      <div className="flex items-center gap-3 mb-7">
+      <div className="flex items-center gap-3 mb-5">
         <h2 className="text-[22px] font-bold text-[#1f2433]">Messages reçus</h2>
         {unreadCount > 0 && (
           <span className="inline-flex items-center justify-center bg-[#c75d48] text-white text-[12px] font-bold rounded-full px-2.5 py-0.5 min-w-[24px]">
             {unreadCount}
           </span>
         )}
-        <span className="text-gray-400 text-[14px]">{contacts.length} au total</span>
+      </div>
+
+      {/* Onglets de filtre */}
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {tabs.map(t => (
+          <button key={t.key} onClick={() => setFilter(t.key)}
+            className={`px-4 py-2 rounded-full text-[13.5px] font-semibold transition-colors border
+              ${filter === t.key ? 'bg-navy text-white border-navy' : 'bg-white text-head border-line hover:border-navy'}`}>
+            {t.label}{t.count != null && <span className="opacity-70"> ({t.count})</span>}
+          </button>
+        ))}
       </div>
 
       {isLoading ? (
@@ -66,7 +102,7 @@ function AdminContactsPage() {
       ) : sorted.length === 0 ? (
         <div className="bg-white rounded-[16px] border border-gray-200 p-12 text-center">
           <div className="text-[40px] mb-3">✉️</div>
-          <p className="text-[#1f2433] font-semibold text-[16px]">Aucun message reçu</p>
+          <p className="text-[#1f2433] font-semibold text-[16px]">Aucun message {filter !== 'all' ? 'dans ce filtre' : 'reçu'}</p>
           <p className="text-gray-400 text-[14px] mt-1">Les demandes de contact apparaîtront ici.</p>
         </div>
       ) : (
@@ -89,21 +125,26 @@ function AdminContactsPage() {
                   )}
                   <span className="font-bold text-[#1f2433] text-[15px]">{c.name}</span>
                   <a href={`mailto:${c.email}`} className="text-[#122866] text-[14px] hover:underline">{c.email}</a>
-                  {c.phone && <span className="text-gray-400 text-[14px]">{c.phone}</span>}
+                  {c.phone && <a href={`tel:${c.phone}`} className="text-gray-500 text-[14px] hover:underline">{c.phone}</a>}
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-gray-400 text-[13px] whitespace-nowrap">
                     {new Date(c.createdAt).toLocaleDateString('fr-FR')}
                   </span>
-                  {!c.read && (
-                    <button
-                      onClick={() => markRead.mutate(c.id)}
-                      disabled={markRead.isPending && markRead.variables === c.id}
-                      className="text-[13.5px] font-semibold text-[#122866] hover:underline disabled:opacity-50 whitespace-nowrap"
-                    >
-                      Marquer comme lu
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setRead.mutate({ id: c.id, read: !c.read })}
+                    disabled={setRead.isPending && setRead.variables?.id === c.id}
+                    className="text-[13.5px] font-semibold text-[#122866] hover:underline disabled:opacity-50 whitespace-nowrap"
+                  >
+                    {c.read ? 'Marquer non lu' : 'Marquer comme lu'}
+                  </button>
+                  <button
+                    onClick={() => { if (confirm(`Supprimer le message de « ${c.name} » ?`)) remove.mutate(c.id); }}
+                    disabled={remove.isPending && remove.variables === c.id}
+                    className="text-[13.5px] font-semibold text-[#c75d48] hover:underline disabled:opacity-50 whitespace-nowrap"
+                  >
+                    Supprimer
+                  </button>
                 </div>
               </div>
               <p className="mt-3 text-[#1f2433] text-[14px] leading-relaxed whitespace-pre-wrap">{c.message}</p>

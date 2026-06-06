@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { api } from '../../lib/api';
 import type { Property } from 'shared';
 
 export type FormData = {
@@ -59,6 +60,14 @@ export function PropertyForm({ initial, propertyId, initialPhotos, initialFeatur
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const qc = useQueryClient();
+
+  const { data: team = [] } = useQuery({
+    queryKey: ['team'],
+    queryFn: async () => {
+      const { data } = await api.api.team.get();
+      return (data ?? []) as { id: string; name: string; role: string }[];
+    },
+  });
 
   const set = (k: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [k]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }));
@@ -147,6 +156,13 @@ export function PropertyForm({ initial, propertyId, initialPhotos, initialFeatur
           </select>
         </div>
         <Field label="Coût énergétique estimé" k="energyCost" placeholder="ex: 1 290 €" />
+        <div className="mb-4">
+          <label className="block font-semibold text-[14px] text-head mb-1.5">Négociateur en charge</label>
+          <select value={form.agentId} onChange={set('agentId')} className="w-full border border-[#dfe3ec] rounded-[12px] px-4 py-3 font-[inherit] text-[14.5px] focus:outline-none focus:border-navy">
+            <option value="">— Aucun —</option>
+            {team.map(m => <option key={m.id} value={m.id}>{m.name}{m.role ? ` · ${m.role}` : ''}</option>)}
+          </select>
+        </div>
       </div>
 
       <div className="mb-4">
