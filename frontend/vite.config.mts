@@ -10,10 +10,12 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    host: '127.0.0.1',
+    allowedHosts: ['agence-leblanc.hipposaas.cloud'],
     port: 5173,
     proxy: {
-      '/api': { target: 'http://localhost:3001', changeOrigin: true },
-      '/uploads': { target: 'http://localhost:3001', changeOrigin: true },
+      '/api': { target: 'http://localhost:3002', changeOrigin: true },
+      '/uploads': { target: 'http://localhost:3002', changeOrigin: true },
     },
   },
 });

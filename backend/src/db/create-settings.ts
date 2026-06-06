@@ -1,6 +1,6 @@
-import { neon } from '@neondatabase/serverless';
+import postgres from 'postgres';
 
-const sql = neon(process.env.DATABASE_URL!);
+const sql = postgres(process.env.DATABASE_URL!, { max: 1 });
 
 await sql`CREATE TABLE IF NOT EXISTS site_settings (key text PRIMARY KEY, value text NOT NULL DEFAULT '')`;
 await sql`
@@ -14,5 +14,6 @@ await sql`
     ('hours', '9h-12h / 14h-19h · Lundi au samedi')
   ON CONFLICT (key) DO NOTHING
 `;
+await sql.end();
 console.log('✅ site_settings créé');
 process.exit(0);

@@ -1,11 +1,11 @@
-import { drizzle } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import { eq } from 'drizzle-orm';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 import * as schema from './schema';
 
-const sql = neon(process.env.DATABASE_URL!);
+const sql = postgres(process.env.DATABASE_URL!, { max: 10 });
 const db = drizzle(sql, { schema });
 
 const UPLOADS_DIR = join(import.meta.dir, '../../uploads');
